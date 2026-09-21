@@ -32,7 +32,7 @@ class CandidateFinding:
 
 class ForensicInterrogator:
     def __init__(self):
-        pass
+        self.findings_count = 0
 
     def evaluate_bundle(self, bundle: ActionBundle) -> List[CandidateFinding]:
         findings: List[CandidateFinding] = []

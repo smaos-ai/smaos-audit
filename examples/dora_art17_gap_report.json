@@ -1,0 +1,7 @@
+{
+  "incident_classification": "Major",
+  "affected_clients_threshold": "0% (Mitigated)",
+  "financial_impact_risk": "High (\u20ac100,000+ Potential Double-Spend)",
+  "mitigation": "State forced to UNKNOWN via Evidence Absent invariant",
+  "tri_score": "0% Toxic Receipts in current trace"
+}

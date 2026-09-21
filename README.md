@@ -1,44 +1,27 @@
-# smaos-audit v0.1.0 (Agent Flight Recorder)
+# smaos-audit (Agent Flight Recorder)
 
-**smaos-audit** is a zero-egress, air-gapped auditor for autonomous AI agents. It mitigates the hallucinated state drift (e.g., HTTP 504 timeouts) left behind by pre-execution authorization frameworks like Microsoft AGT.
+> **`smaos-audit`**: Zero-dependency wire-fault & cognitive overclaim auditor for autonomous agentic workflows.  
+> **Core Invariant:** \(\text{Evidence Absent} \implies \mathbf{UNKNOWN} \quad (\text{NEVER } \mathbf{CONFIRMED})\)
 
-## Core Problem
-Agents assume an action succeeded because they triggered it. If a network drops during a deployment or trade, the agent hallucinates a \`CONFIRMED\` state, triggering catastrophic ledger drift and DORA compliance violations.
+**smaos-audit** mitigates the hallucinated state drift (e.g., HTTP 504 timeouts) left behind by pre-execution authorization frameworks like Microsoft AGT.
 
-## How it Works
-1. **Zero-Egress Execution:** Runs in a strict `--network none` Docker container or Wasm cell.
-2. **Net Ledger Reconciliation:** Validates the bitemporal state to ensure \`∑Δ_net = 0.00\`.
-3. **DORA RTS 2024/1772 Compliant:** Automatically generates Article 17 Major Incident gap reports.
+## 1-Line Execution
+Run offline to guarantee zero data egress:
+```bash
+docker run --rm -v $(pwd)/traces:/data:ro --network none smaos-ai/smaos-audit:v0.1.0
+```
 
-## Quickstart
-\`\`\`bash
-# 1. Build the air-gapped auditor
-docker build -t smaos-audit .
-
-# 2. Run an audit trace offline
-docker run --network none -v $(pwd)/fixtures:/data smaos-audit /data/sample_staging_traces.jsonl
-\`\`\`
-
-## The Engine: `proof_or_stop.py`
-Engineers can inject this 5-line drop-in decorator to instantly mitigate HTTP 504 timeouts and force a state downgrade to \`UNKNOWN\`:
-
+## The Remediation Decorator (`fix.patch`)
 ```python
-import functools, socket, logging
-
-def proof_or_stop(timeout=5.0):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            socket.setdefaulttimeout(timeout)
-            try: return func(*args, **kwargs)
-            except (socket.timeout, TimeoutError) as e:
-                return {"status": "UNKNOWN", "reason": "HTTP 504 / TCP RST"}
-        return wrapper
-    return decorator
+@proof_or_stop
+def execute_wire_action(payload):
+    # If HTTP 504 or unverified retrieval occurs:
+    # Forces immutable UNKNOWN state & prevents double-spend retries
+    return gateway_dispatch(payload)
 ```
 
 ## Architecture
-See \`smaos_audit/\` for the 6-stage stdlib Python pipeline (Dispatcher, Bundler, Interrogator, Reflector, Reporter).
+See `smaos_audit/` for the 0-dependency stdlib Python pipeline (Anonymizer, Dispatcher, Bundler, Interrogator, Reflector, Reporter). See `examples/` for board-ready output deliverables.
 
 ## License
 Apache 2.0. See [LICENSE](LICENSE).

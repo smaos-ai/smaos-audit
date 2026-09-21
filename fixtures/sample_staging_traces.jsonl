@@ -1,0 +1,4 @@
+{"trace_id": "tr-88219", "timestamp": "2026-09-21T07:14:02.112Z", "agent_id": "payment-agent-01", "action": "disburse_funds", "amount": 1850.00, "currency": "EUR", "status": "CONFIRMED", "wire_status": "200_OK"}
+{"trace_id": "tr-88220", "timestamp": "2026-09-21T07:14:05.419Z", "agent_id": "payment-agent-01", "action": "disburse_funds", "amount": 2400.00, "currency": "EUR", "status": "UNKNOWN", "wire_status": "504_GATEWAY_TIMEOUT", "error": "TCP RST / Upstream Gateway Timeout"}
+{"trace_id": "tr-88221", "timestamp": "2026-09-21T07:14:10.881Z", "agent_id": "payment-agent-02", "action": "account_query", "amount": 0.00, "currency": "EUR", "status": "CONFIRMED", "wire_status": "200_OK"}
+{"trace_id": "tr-88222", "timestamp": "2026-09-21T07:14:12.302Z", "agent_id": "payment-agent-01", "action": "retry_disburse", "amount": 2400.00, "currency": "EUR", "status": "REFUSED", "wire_status": "BLOCKED_BY_POLICY", "reason": "Pending UNKNOWN state on prior trace tr-88220"}

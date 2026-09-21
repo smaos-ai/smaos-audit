@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html>
-<head><title>Offline WASM Verifier</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>smaos-audit: Offline WASM Verifier</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; padding: 40px; text-align: center; }
+        #drop-zone { border: 2px dashed #30363d; border-radius: 12px; padding: 60px; margin: 40px auto; max-width: 600px; background: #161b22; cursor: pointer; }
+        #status { font-family: monospace; font-size: 16px; margin-top: 20px; }
+    </style>
+</head>
 <body>
-    <h1>smaos-audit: Offline Verification</h1>
-    <p>Drag and drop your `evidence.cose` file here to mathematically verify the Ed25519 signature and Merkle inclusion root.</p>
-    <p><em>(Status: Offline. Network Egress Blocked.)</em></p>
+    <h1>smaos-audit Offline Verifier</h1>
+    <p>Guaranteed Zero-Egress. Runs entirely in your browser using local Web Crypto.</p>
+    <div id="drop-zone">
+        <h3>Drag and drop an <code>evidence.cose</code> or trace file here</h3>
+        <p>Validates cryptographic root and payload integrity offline</p>
+    </div>
+    <div id="status">Awaiting receipt drop...</div>
     <script src="smaos_verify.js"></script>
 </body>
 </html>

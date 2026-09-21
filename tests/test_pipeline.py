@@ -3,6 +3,8 @@ import os
 import json
 from smaos_audit import __version__
 from smaos_audit.reporter import generate_dora_report, generate_mermaid_trace
+from smaos_audit.anonymizer import anonymize_trace_record
+from smaos_audit.dispatcher import DeterministicDispatcher
 
 class TestPipeline(unittest.TestCase):
     def test_version(self):
@@ -25,6 +27,16 @@ class TestPipeline(unittest.TestCase):
             
         if os.path.exists(mermaid_path): os.remove(mermaid_path)
         if os.path.exists(json_path): os.remove(json_path)
+
+    def test_anonymizer(self):
+        sample = {"user_email": "alice@fintech.cz", "action": "transfer", "amount": 100}
+        clean = anonymize_trace_record(sample)
+        self.assertNotEqual(clean["user_email"], "alice@fintech.cz")
+        self.assertTrue(clean["user_email"].startswith("anon_"))
+
+    def test_dispatcher_import(self):
+        d = DeterministicDispatcher()
+        self.assertIsNotNone(d)
 
 if __name__ == "__main__":
     unittest.main()

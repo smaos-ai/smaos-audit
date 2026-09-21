@@ -19,6 +19,24 @@ docker build -t smaos-audit .
 docker run --network none -v $(pwd)/fixtures:/data smaos-audit /data/sample_staging_traces.jsonl
 \`\`\`
 
+## The Engine: `proof_or_stop.py`
+Engineers can inject this 5-line drop-in decorator to instantly mitigate HTTP 504 timeouts and force a state downgrade to \`UNKNOWN\`:
+
+```python
+import functools, socket, logging
+
+def proof_or_stop(timeout=5.0):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            socket.setdefaulttimeout(timeout)
+            try: return func(*args, **kwargs)
+            except (socket.timeout, TimeoutError) as e:
+                return {"status": "UNKNOWN", "reason": "HTTP 504 / TCP RST"}
+        return wrapper
+    return decorator
+```
+
 ## Architecture
 See \`smaos_audit/\` for the 6-stage stdlib Python pipeline (Dispatcher, Bundler, Interrogator, Reflector, Reporter).
 

@@ -55,6 +55,14 @@ class WireTruthReflector:
             if unique_xids == 1 and all(s == 200 for s in statuses if s):
                 return False, "Discarded: Wire confirms single unique commit XID and clean HTTP 200 settlement."
 
+        if finding.category == "JEV_INTENT_WIRE_FAULT_COLLISION":
+            # True finding: Wire proves transport fault occurred despite pre-execution permission
+            return True, "Verified: Pre-execution Jev decision 'ALLOW' collided with HTTP wire timeout. Enforce UNKNOWN."
+
+        if finding.category == "JEV_DENIAL_MUTATION_ATTEMPT":
+            # True finding: Agent dispatched mutation despite Jev pre-execution rejection
+            return True, "Verified: Agent dispatched mutating call despite Jev 'DENY' decision."
+
         if finding.category in ("UNAUTHORIZED_EGRESS", "DATA_EXFILTRATION_RISK"):
             ebpf_actions = facts.get("ebpf_actions", [])
             if "EBPF_KERNEL_DROP" in ebpf_actions:

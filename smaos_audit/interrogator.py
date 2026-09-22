@@ -32,7 +32,8 @@ class CandidateFinding:
 
 class ForensicInterrogator:
     def __init__(self):
-        self.findings_count = 0
+        self.version = "1.1.0"
+        self.enforce_fail_closed = True
 
     def evaluate_bundle(self, bundle: ActionBundle) -> List[CandidateFinding]:
         findings: List[CandidateFinding] = []
@@ -87,18 +88,60 @@ class ForensicInterrogator:
                 evidence_fields=retry_check,
             ))
 
-        # 4. Double Execution check
-        lineage = inspect_disbursement_lineage(bundle, bundle.action_id)
-        if lineage["double_execution_risk"]:
+        # 4. Disbursement Lineage check
+        lineage_check = inspect_disbursement_lineage(bundle, bundle.action_id)
+        if lineage_check.get("orphaned_disbursement"):
             findings.append(CandidateFinding(
-                finding_id=f"FIND-{bundle.action_id}-DOUBLE-EXEC",
+                finding_id=f"FIND-{bundle.action_id}-ORPHAN",
                 severity="CRITICAL",
-                category="DOUBLE_EXECUTION_RISK",
+                category="ORPHANED_DISBURSEMENT_RECORD",
                 action_id=bundle.action_id,
                 claimed_verdict="CONFIRMED",
-                rationale=f"Multiple distinct database commit XIDs ({lineage['commit_xids']}) detected for single logical action.",
-                proposed_remediation="Apply deterministic idempotency keys at database layer.",
-                evidence_fields=lineage,
+                rationale="Disbursement lacks valid parent authorization action_id.",
+                proposed_remediation="Revoke transaction; enforce parent intent attachment.",
+                evidence_fields=lineage_check,
             ))
+
+        # 5. Jev Intent vs. Wire Settlement Reconciliation Gate
+        for t in bundle.traces:
+            jev_intent = str(t.record.get("jev_intent", t.record.get("jev_guard", t.record.get("intent_decision", "NONE")))).lower()
+            if jev_intent in ("allow", "approved"):
+                if t.http_status in (500, 502, 503, 504) or facts.get("has_wire_fault"):
+                    findings.append(CandidateFinding(
+                        finding_id=f"FIND-{t.action_id}-JEV-COLLISION",
+                        severity="CRITICAL",
+                        category="JEV_INTENT_WIRE_FAULT_COLLISION",
+                        action_id=t.action_id,
+                        claimed_verdict=t.claimed_verdict,
+                        rationale=(
+                            f"Jev pre-execution intent was '{jev_intent.upper()}', but backend network dropped with "
+                            f"HTTP {t.http_status} / {t.wire_fault}. Violates Wire Settlement Invariant. State must downgrade to UNKNOWN."
+                        ),
+                        proposed_remediation="Downgrade state immediately to verdict: UNKNOWN. Freeze retries to prevent double-disbursement.",
+                        evidence_fields={
+                            "jev_intent": jev_intent,
+                            "wire_status": t.http_status,
+                            "wire_fault": t.wire_fault,
+                            "claimed_verdict": t.claimed_verdict,
+                        },
+                    ))
+            elif jev_intent in ("deny", "blocked", "prohibited"):
+                if t.is_mutating():
+                    findings.append(CandidateFinding(
+                        finding_id=f"FIND-{t.action_id}-JEV-DISPATCH-VIOLATION",
+                        severity="CRITICAL",
+                        category="JEV_DENIAL_MUTATION_ATTEMPT",
+                        action_id=t.action_id,
+                        claimed_verdict=t.claimed_verdict,
+                        rationale=(
+                            f"Jev pre-execution intent was '{jev_intent.upper()}', but agent attempted "
+                            f"mutating action '{t.action_type}'. Pre-execution gate bypassed."
+                        ),
+                        proposed_remediation="Intercept and halt execution at kernel boundary (EPERM / HALT).",
+                        evidence_fields={
+                            "jev_intent": jev_intent,
+                            "action_type": t.action_type,
+                        },
+                    ))
 
         return findings

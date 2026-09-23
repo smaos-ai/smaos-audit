@@ -1,0 +1,6 @@
+# DORA Article 28(3) Register of Information — ICT Third-Party Service Provider Contribution
+# Technical Standard: ESA Final Draft RTS on Register of Information (JC 2023 85 / RTS 2024/1772)
+# Entity: UniCredit S.p.A. | Provider: SovereignNexus s.r.o. | Scope: Air-Gapped Cognitive Decision Appliance
+Entity_LEI,Provider_Identifier,Provider_Name,Provider_Country,Contract_Reference,Service_Classification,Supported_Function,Critical_Function,Data_Location_Storage,Data_Location_Processing,Network_Egress_Permitted,Subcontractors_Disclosed,Audit_Rights_Clause,Exit_Strategy_Documented,Incident_Notification_SLA_Hours,Cryptographic_Standard
+549300TRUWO2CD2G5692,315700SOVEREIGNX001,SovereignNexus s.r.o.,CZ,UNICREDIT-SMAOS-2026-PILOT-01,SEC_01_BOUNDARY_AUDIT,High-Risk SME Credit Underwriting,YES,ON_PREMISE_AIR_GAP,ON_PREMISE_AIR_GAP,0_BYTES_NONE,NONE_STANDALONE,YES_SLSA_LEVEL_3,YES_OPEN_RFC_SPECS,2_HOURS,RFC8785_JCS_ED25519_SCITT
+549300TRUWO2CD2G5692,315700SOVEREIGNX001,SovereignNexus s.r.o.,CZ,UNICREDIT-SMAOS-2026-PILOT-01,SEC_02_WASM_VERIFIER,Client-Side Deterministic SCITT Verification,YES,CLIENT_BROWSER_LOCAL,CLIENT_BROWSER_LOCAL,0_BYTES_NONE,NONE_STANDALONE,YES_SLSA_LEVEL_3,YES_OPEN_RFC_SPECS,2_HOURS,WASM_SUB_11US_OFFLINE
